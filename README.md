@@ -1,5 +1,7 @@
 # Pexeso generator
 
+[![Tests](https://github.com/nightoul/pexeso-generator/actions/workflows/tests.yml/badge.svg)](https://github.com/nightoul/pexeso-generator/actions/workflows/tests.yml)
+
 Make printable, square memory-game cards from a folder of pictures. Designed for teachers: save one picture per vocabulary word, then generate matching pairs in one command.
 
 ## Setup
@@ -46,6 +48,8 @@ All dimensions are in millimeters. `--fit contain` shows the complete image; `--
 ## Development
 
 ```sh
-python -m pip install pypdf
+python -m pip install -r requirements-dev.txt
 python -m unittest discover -s tests -v
 ```
+
+GitHub Actions runs the tests and checks the CLI on Python 3.10 through 3.14 for every push and pull request. You can also run it manually from the repository's Actions tab.
