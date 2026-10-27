@@ -24,7 +24,7 @@ Put your PNG, JPG, or JPEG files in a folder, then run:
 python pexeso.py ./pictures -o ./output/animals.pdf
 ```
 
-By default, each picture appears twice, in adjacent positions. Cards are **50 × 50 mm**, with light cut lines, 3 mm internal padding, and 2 mm gaps. The grid is centered on portrait A4 with at least 10 mm margins: 3 columns × 5 rows per sheet. Extra cards automatically continue onto another page. Print at **100% / actual size**, then cut along the square outlines.
+By default, each picture appears twice, in adjacent positions. Cards are **50 × 50 mm**, with light cut lines and 3 mm internal padding. Neighbouring cards touch, so each line between them is a single scissor cut. The grid is centered on portrait A4 with at least 10 mm margins: 3 columns × 5 rows per sheet. Extra cards automatically continue onto another page. Print at **100% / actual size**, then cut along the square outlines.
 
 Pictures retain their proportions and are never cropped by default. Transparent areas become white, phone-photo orientation is respected, and embedded pictures are resized to a maximum of 300 DPI at print size. Only files directly inside the input folder are included, in filename order; other file types are ignored. A corrupt picture stops generation with its filename, leaving any existing output intact.
 
@@ -37,8 +37,8 @@ python pexeso.py ./pictures -o large.pdf --card-size 60 --fit cover
 # One copy of each image for flashcards
 python pexeso.py ./pictures --copies 1
 
-# Tightly packed cards, without gaps
-python pexeso.py ./pictures --gap 0 --padding 2 --margin 12
+# Separate cards with 2 mm gaps, less padding, and wider margins
+python pexeso.py ./pictures --gap 2 --padding 2 --margin 12
 
 python pexeso.py --help
 ```

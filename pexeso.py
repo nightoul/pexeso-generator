@@ -30,7 +30,7 @@ def positive(value):
     return number
 
 
-def generate(folder, output, card_size=50, margin=10, gap=2, padding=3,
+def generate(folder, output, card_size=50, margin=10, gap=0, padding=3,
              copies=2, fit="contain"):
     """Generate a PDF; dimensions are millimeters. Return (cards, pages)."""
     folder, output = Path(folder), Path(output)
@@ -107,7 +107,7 @@ def main(argv=None):
     parser.add_argument("-o", "--output", type=Path, default=Path("pexeso.pdf"))
     parser.add_argument("--card-size", type=positive, default=50, help="square side in mm (default: 50)")
     parser.add_argument("--margin", type=nonnegative, default=10, help="minimum page margin in mm (default: 10)")
-    parser.add_argument("--gap", type=nonnegative, default=2, help="gap between cards in mm (default: 2)")
+    parser.add_argument("--gap", type=nonnegative, default=0, help="gap between cards in mm (default: 0, shared cut lines)")
     parser.add_argument("--padding", type=nonnegative, default=3, help="image inset in mm (default: 3)")
     parser.add_argument("--copies", type=int, default=2, help="copies per image (default: 2 for pairs)")
     parser.add_argument("--fit", choices=("contain", "cover"), default="contain",

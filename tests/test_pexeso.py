@@ -24,6 +24,13 @@ class GeneratorTests(unittest.TestCase):
             # Every card has one square cut outline, including the last page.
             self.assertEqual(pages[0].get_contents().get_data().count(b" re S"), 15)
             self.assertEqual(pages[1].get_contents().get_data().count(b" re S"), 1)
+            # By default, neighbouring cards share cut lines.
+            rects = [tuple(map(float, line.split()[-6:-2]))
+                     for line in pages[0].get_contents().get_data().splitlines()
+                     if line.endswith(b" re S")]
+            (x1, y1, w, h), (x2, y2, _, _), (_, _, _, _), (x4, y4, _, _) = rects[:4]
+            self.assertAlmostEqual(x2, x1 + w, places=3)
+            self.assertAlmostEqual(y4, y1 - h, places=3)
 
     def test_corrupt_image_preserves_existing_output(self):
         with tempfile.TemporaryDirectory() as root:
