@@ -31,7 +31,7 @@ def positive(value):
 
 
 def generate(folder, output, card_size=50, margin=10, gap=0, padding=3,
-             copies=2, fit="contain"):
+             copies=2, fit="cover"):
     """Generate a PDF; dimensions are millimeters. Return (cards, pages)."""
     folder, output = Path(folder), Path(output)
     if not folder.is_dir():
@@ -110,8 +110,8 @@ def main(argv=None):
     parser.add_argument("--gap", type=nonnegative, default=0, help="gap between cards in mm (default: 0, shared cut lines)")
     parser.add_argument("--padding", type=nonnegative, default=3, help="image inset in mm (default: 3)")
     parser.add_argument("--copies", type=int, default=2, help="copies per image (default: 2 for pairs)")
-    parser.add_argument("--fit", choices=("contain", "cover"), default="contain",
-                        help="contain preserves the whole picture; cover crops to fill")
+    parser.add_argument("--fit", choices=("contain", "cover"), default="cover",
+                        help="cover zooms in to a centered square (default); contain preserves the whole picture")
     args = parser.parse_args(argv)
     try:
         cards, pages = generate(**vars(args))

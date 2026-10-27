@@ -31,6 +31,11 @@ class GeneratorTests(unittest.TestCase):
             (x1, y1, w, h), (x2, y2, _, _), (_, _, _, _), (x4, y4, _, _) = rects[:4]
             self.assertAlmostEqual(x2, x1 + w, places=3)
             self.assertAlmostEqual(y4, y1 - h, places=3)
+            # By default, wide pictures are cropped to fill a square.
+            for line in pages[0].get_contents().get_data().splitlines():
+                if line.endswith(b" cm"):
+                    iw, _, _, ih = map(float, line.split()[-7:-3])
+                    self.assertAlmostEqual(iw, ih, places=3)
 
     def test_corrupt_image_preserves_existing_output(self):
         with tempfile.TemporaryDirectory() as root:
