@@ -2,6 +2,7 @@
 """Turn a folder of pictures into printable square memory-game cards."""
 
 import argparse
+import io
 import math
 from pathlib import Path
 import sys
@@ -102,7 +103,11 @@ def generate(folder, output, card_size=50, margin=10, gap=0, padding=3,
                         image.thumbnail((pixels, pixels), Image.Resampling.LANCZOS)
             except (OSError, ValueError, Image.DecompressionBombError) as exc:
                 raise ValueError(f"Cannot read image {path.name}: {exc}") from exc
-            reader = ImageReader(image)
+            # Embed high-quality JPEG (no chroma subsampling, so clip-art edges stay crisp).
+            jpeg = io.BytesIO()
+            image.save(jpeg, "JPEG", quality=92, subsampling=0)
+            jpeg.seek(0)
+            reader = ImageReader(jpeg)
             inner = size - 2 * padding * mm
             scale = min(inner / image.width, inner / image.height)
             iw, ih = image.width * scale, image.height * scale

@@ -31,6 +31,9 @@ class GeneratorTests(unittest.TestCase):
             (x1, y1, w, h), (x2, y2, _, _), (_, _, _, _), (x4, y4, _, _) = rects[:4]
             self.assertAlmostEqual(x2, x1 + w, places=3)
             self.assertAlmostEqual(y4, y1 - h, places=3)
+            # Pictures are embedded as JPEG to keep the file small enough to email.
+            for xobject in pages[0]["/Resources"]["/XObject"].values():
+                self.assertIn("/DCTDecode", xobject.get_object()["/Filter"])
             # By default, wide photos are cropped to fill a square.
             for line in pages[0].get_contents().get_data().splitlines():
                 if line.endswith(b" cm"):
