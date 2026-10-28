@@ -31,11 +31,25 @@ class GeneratorTests(unittest.TestCase):
             (x1, y1, w, h), (x2, y2, _, _), (_, _, _, _), (x4, y4, _, _) = rects[:4]
             self.assertAlmostEqual(x2, x1 + w, places=3)
             self.assertAlmostEqual(y4, y1 - h, places=3)
-            # By default, wide pictures are cropped to fill a square.
+            # By default, wide photos are cropped to fill a square.
             for line in pages[0].get_contents().get_data().splitlines():
                 if line.endswith(b" cm"):
                     iw, _, _, ih = map(float, line.split()[-7:-3])
                     self.assertAlmostEqual(iw, ih, places=3)
+
+    def test_clip_art_is_trimmed_and_shown_whole(self):
+        with tempfile.TemporaryDirectory() as root:
+            folder = Path(root)
+            # A wide subject on a white background, with uneven white borders.
+            image = Image.new("RGB", (300, 300), "white")
+            image.paste((200, 30, 30), (20, 100, 260, 160))
+            image.save(folder / "clip.png")
+            output = folder / "cards.pdf"
+            generate(folder, output, copies=1)
+            data = PdfReader(output).pages[0].get_contents().get_data()
+            line = next(l for l in data.splitlines() if l.endswith(b" cm"))
+            iw, _, _, ih = map(float, line.split()[-7:-3])
+            self.assertAlmostEqual(iw / ih, 240 / 60, places=1)
 
     def test_corrupt_image_preserves_existing_output(self):
         with tempfile.TemporaryDirectory() as root:

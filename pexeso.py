@@ -7,13 +7,14 @@ from pathlib import Path
 import sys
 import tempfile
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageChops, ImageOps
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
 EXTENSIONS = {".png", ".jpg", ".jpeg"}
+WHITE = 240  # Grey levels at or above this count as background white.
 
 
 def nonnegative(value):
@@ -30,8 +31,25 @@ def positive(value):
     return number
 
 
+def plain_background(image):
+    """Return True when most of the picture's outer edge is white, as in clip-art."""
+    width, height = image.size
+    gray = image.convert("L")
+    edges = [gray.crop(box) for box in ((0, 0, width, 1), (0, height - 1, width, height),
+                                        (0, 0, 1, height), (width - 1, 0, width, height))]
+    white = sum(sum(edge.histogram()[WHITE:]) for edge in edges)
+    return white >= 0.8 * 2 * (width + height)
+
+
+def trim(image):
+    """Crop away plain white borders around the picture's subject."""
+    difference = ImageChops.difference(image, Image.new("RGB", image.size, "white"))
+    box = difference.convert("L").point(lambda v: 255 if v > 255 - WHITE else 0).getbbox()
+    return image.crop(box) if box else image
+
+
 def generate(folder, output, card_size=50, margin=10, gap=0, padding=3,
-             copies=2, fit="cover"):
+             copies=2, fit="smart"):
     """Generate a PDF; dimensions are millimeters. Return (cards, pages)."""
     folder, output = Path(folder), Path(output)
     if not folder.is_dir():
@@ -39,7 +57,7 @@ def generate(folder, output, card_size=50, margin=10, gap=0, padding=3,
     if (not all(math.isfinite(v) for v in (card_size, margin, gap, padding))
             or card_size <= 0 or min(margin, gap, padding) < 0
             or padding * 2 >= card_size or copies < 1
-            or not isinstance(copies, int) or fit not in {"contain", "cover"}):
+            or not isinstance(copies, int) or fit not in {"smart", "contain", "cover"}):
         raise ValueError("Invalid card dimensions, copies, or fit mode")
     width, height = A4
     size, border, gutter = card_size * mm, margin * mm, gap * mm
@@ -73,7 +91,12 @@ def generate(folder, output, card_size=50, margin=10, gap=0, padding=3,
                     background = Image.new("RGBA", image.size, "white")
                     background.alpha_composite(image)
                     image = background.convert("RGB")
-                    if fit == "cover":
+                    mode = fit
+                    if fit == "smart":
+                        # Clip-art blends into the white card; photos must fill the square.
+                        mode = "contain" if plain_background(image) else "cover"
+                        image = trim(image)
+                    if mode == "cover":
                         image = ImageOps.fit(image, (pixels, pixels), method=Image.Resampling.LANCZOS)
                     else:
                         image.thumbnail((pixels, pixels), Image.Resampling.LANCZOS)
@@ -110,8 +133,9 @@ def main(argv=None):
     parser.add_argument("--gap", type=nonnegative, default=0, help="gap between cards in mm (default: 0, shared cut lines)")
     parser.add_argument("--padding", type=nonnegative, default=3, help="image inset in mm (default: 3)")
     parser.add_argument("--copies", type=int, default=2, help="copies per image (default: 2 for pairs)")
-    parser.add_argument("--fit", choices=("contain", "cover"), default="cover",
-                        help="cover zooms in to a centered square (default); contain preserves the whole picture")
+    parser.add_argument("--fit", choices=("smart", "contain", "cover"), default="smart",
+                        help="smart shows clip-art whole and crops photos to a square (default); "
+                             "cover always crops to a centered square; contain always shows the whole picture")
     args = parser.parse_args(argv)
     try:
         cards, pages = generate(**vars(args))

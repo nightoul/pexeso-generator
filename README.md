@@ -26,7 +26,7 @@ python pexeso.py ./pictures -o ./output/animals.pdf
 
 By default, each picture appears twice, in adjacent positions. Cards are **50 × 50 mm**, with light cut lines and 3 mm internal padding. Neighbouring cards touch, so each line between them is a single scissor cut. The grid is centered on portrait A4 with at least 10 mm margins: 3 columns × 5 rows per sheet. Extra cards automatically continue onto another page. Print at **100% / actual size**, then cut along the square outlines.
 
-By default, every picture fills a square: it is zoomed in and cropped evenly from the center, so tall or wide pictures lose a little from their edges. Transparent areas become white, phone-photo orientation is respected, and embedded pictures are resized to a maximum of 300 DPI at print size. Only files directly inside the input folder are included, in filename order; other file types are ignored. A corrupt picture stops generation with its filename, leaving any existing output intact.
+By default, pictures are fitted smartly. Clip-art on a white or transparent background has its empty borders trimmed and is shown whole, since leftover space blends into the white card. Photos with a colored background are zoomed in and cropped evenly from the center to fill the square. Transparent areas become white, phone-photo orientation is respected, and embedded pictures are resized to a maximum of 300 DPI at print size. Only files directly inside the input folder are included, in filename order; other file types are ignored. A corrupt picture stops generation with its filename, leaving any existing output intact.
 
 ## Options
 
@@ -43,7 +43,7 @@ python pexeso.py ./pictures --gap 2 --padding 2 --margin 12
 python pexeso.py --help
 ```
 
-All dimensions are in millimeters. `--fit cover` (the default) crops each image to a square; `--fit contain` shows the complete image and keeps its proportions. The output file is replaced when generation succeeds. Card backs and duplex printing are not included.
+All dimensions are in millimeters. `--fit smart` (the default) chooses per picture as described above; `--fit cover` always crops each image to a square; `--fit contain` always shows the complete image and keeps its proportions. The output file is replaced when generation succeeds. Card backs and duplex printing are not included.
 
 ## Development
 
